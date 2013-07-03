@@ -169,11 +169,11 @@
 }
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError {
-	CNLog(@"parseErrorOccurred: %@", parseError);
+	//NSLog(@"parseErrorOccurred: %@", parseError);
 }
 
 - (void)parser:(NSXMLParser *)parser validationErrorOccurred:(NSError *)validError {
-	CNLog(@"validationErrorOccurred: %@", validError);
+	//NSLog(@"validationErrorOccurred: %@", validError);
 }
 
 @end
