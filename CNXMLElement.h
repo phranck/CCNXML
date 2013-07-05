@@ -72,12 +72,13 @@ extern NSString *CNStringEmpty;
 /** @name Handling Child Elements */
 #pragma mark - Handling Child Elements
 
+- (NSArray *)childs;
 - (void)addChild:(CNXMLElement *)childElement;
 - (void)removeChild:(CNXMLElement *)childElement;
 - (void)removeChildWithName:(NSString *)elementName;
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes;
 - (void)removeAllChilds;
-- (void)enumerateChildsUsingBlock:(void(^) (CNXMLElement * child, BOOL * stop))block;
+- (void)enumerateChildsUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block;
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void(^) (CNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL * stop))block;
 - (CNXMLElement *)childWithName:(NSString *)elementName;
 

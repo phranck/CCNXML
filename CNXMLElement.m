@@ -78,7 +78,8 @@ NSString *CNStringEmpty = @"";
 		_mappingPrefix = mappingPrefix;
 		_namespaceURI = namespaceURI;
 		_elementName = elementName;
-		_attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
+        if (attributes) _attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
+        else            _attributes = [NSMutableDictionary new];
 	}
 	return self;
 }
@@ -134,6 +135,11 @@ NSString *CNStringEmpty = @"";
 
 #pragma mark - Handling Child Elements
 
+- (NSArray *)childs
+{
+    return _childs;
+}
+
 - (void)addChild:(CNXMLElement *)childElement {
 	if (childElement != nil)
 		[_childs addObject:childElement];
@@ -173,36 +179,35 @@ NSString *CNStringEmpty = @"";
 	[_childs removeAllObjects];
 }
 
-- (void)enumerateChildsUsingBlock:(void (^)(CNXMLElement *child, BOOL *stop))block {
+- (void)enumerateChildsUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block {
 	[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
-	    block(currentChild, stop);
+	    block(currentChild, idx, stop);
 	}];
 }
 
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL isLastChild, BOOL *stop))block {
-	NSInteger lastChildIndex = 0;
-	if ([_childs count] > 0) {
-		lastChildIndex = [_childs count] - 1;
-	}
-
 	[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
 	    if ([currentChild.elementName isEqualToString:elementName]) {
-	        [currentChild enumerateChildsUsingBlock: ^(CNXMLElement *child, BOOL *stop) {
-	            block(child, idx, (lastChildIndex == idx), stop);
-			}];
+            NSInteger lastChildIndex = 0;
+            if ([[currentChild childs] count] > 0)
+                lastChildIndex = [[currentChild childs] count] - 1;
+
+            [currentChild enumerateChildsUsingBlock:^(CNXMLElement *child, NSUInteger childIndex, BOOL *stop) {
+	            block(child, childIndex, (lastChildIndex == childIndex), stop);
+            }];
 	        *stop = YES;
 		}
 	}];
 }
 
 - (CNXMLElement *)childWithName:(NSString *)elementName {
-	__block CNXMLElement *requestedChild;
-	[self enumerateChildsUsingBlock: ^(CNXMLElement *currentChild, BOOL *stop) {
-	    if ([currentChild.elementName isEqualToString:elementName]) {
-	        requestedChild = currentChild;
+	__block CNXMLElement *requestedChild = nil;
+    [self enumerateChildsUsingBlock:^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
+	    if ([child.elementName isEqualToString:elementName]) {
+	        requestedChild = child;
 	        *stop = YES;
 		}
-	}];
+    }];
 	return requestedChild;
 }
 
