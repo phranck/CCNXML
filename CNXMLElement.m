@@ -133,6 +133,18 @@ NSString *CNStringEmpty = @"";
 	return attributesString;
 }
 
+- (BOOL)hasAttribute:(NSString *)attributeName {
+    __block BOOL hasAttribute = NO;
+    [_attributes enumerateKeysAndObjectsUsingBlock:^(NSString *currentAttribute, id obj, BOOL *stop) {
+        if ([currentAttribute isEqualToString:attributeName]) {
+            hasAttribute = YES;
+            *stop = YES;
+        }
+    }];
+    return hasAttribute;
+}
+
+
 #pragma mark - Handling Child Elements
 
 - (NSArray *)childs

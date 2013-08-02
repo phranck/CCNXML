@@ -61,6 +61,7 @@ extern NSString *CNStringEmpty;
 - (id)valueForAttribute:(NSString *)attributeName;
 - (void)removeAttribute:(NSString *)attributeName;
 - (NSString *)attributesStringRepresentation;
+- (BOOL)hasAttribute:(NSString *)attributeName;
 
 
 /** @name Content Representation */
