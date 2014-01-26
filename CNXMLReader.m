@@ -172,9 +172,7 @@
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
 	if (![string isEqualToString:CNXMLStringEmpty]) {
-        if ([self.currentElementName isEqualToString:F4ElementNameParagraph]) {
-            [_foundCharacters appendString:string];
-        }
+        [_foundCharacters appendString:string];
 	}
     else {
 		_foundCharacters = [NSMutableString stringWithString:CNXMLStringEmpty];
