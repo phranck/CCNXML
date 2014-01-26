@@ -78,8 +78,8 @@ NSString *CNXMLStringEmpty = @"";
 	self = [self init];
 	if (self) {
 		_elementName = theName;
-		_mappingPrefix = (mappingPrefix ? : @"");
-		_qualifiedName = ([_mappingPrefix isEmptyString] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
+		_mappingPrefix = (mappingPrefix ? : CNXMLStringEmpty);
+		_qualifiedName = ([_mappingPrefix isEqualToString:CNXMLStringEmpty] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
 
 		if (attributes)
 			_attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
