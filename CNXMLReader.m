@@ -29,6 +29,7 @@
  */
 
 
+#import "NSString+CNXMLAdditions.h"
 #import "CNXMLReader.h"
 
 
@@ -36,8 +37,8 @@
 	NSXMLParser *_XMLparser;
 	NSMutableArray *_elementStack;
 	NSMutableString *_foundCharacters;
-	NSString *_elementName;
 }
+@property (strong) NSString *currentElementName;
 @end
 
 @implementation CNXMLReader
@@ -46,32 +47,17 @@
 	self = [super init];
 	if (self) {
 		_XMLparser = nil;
-		_elementStack = [NSMutableArray new];
-		_foundCharacters = [NSMutableString stringWithString:CNStringEmpty];
+		_elementStack = [[NSMutableArray alloc] init];
+		_foundCharacters = [NSMutableString stringWithString:CNXMLStringEmpty];
 
+        _currentElementName = nil;
 		_rootElement = nil;
 	}
 	return self;
 }
 
-#pragma mark - XML Document Creation
-
-+ (instancetype)documentWithContentsOfFile:(NSString *)xmlFilePath {
-	return [[[self class] alloc] initWithContentsOfFile:xmlFilePath];
-}
-
 - (instancetype)initWithContentsOfFile:(NSString *)xmlFilePath {
-	self = [self init];
-	if (self) {
-		NSURL *xmlURL = [NSURL fileURLWithPath:xmlFilePath];
-		_XMLparser = [[NSXMLParser alloc] initWithContentsOfURL:xmlURL];
-		[self configureAndStartParser];
-	}
-	return self;
-}
-
-+ (instancetype)documentWithContentsOfString:(NSString *)string {
-	return [[[self class] alloc] initWithContentsOfString:string];
+	return [self initWithFileURL:[NSURL fileURLWithPath:xmlFilePath]];
 }
 
 - (instancetype)initWithContentsOfString:(NSString *)string {
@@ -83,17 +69,43 @@
 	return self;
 }
 
-+ (instancetype)documentWithRootElementName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix namespaceURI:(NSString *)namespaceURI {
-	return [[[self class] alloc] initWithRootElementName:elementName mappingPrefix:mappingPrefix namespaceURI:namespaceURI];
-}
-
-- (instancetype)initWithRootElementName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix namespaceURI:(NSString *)namespaceURI {
+- (instancetype)initWithFileURL:(NSURL *)theURL {
 	self = [self init];
 	if (self) {
-		_rootElement = [CNXMLElement elementWithName:elementName mappingPrefix:mappingPrefix namespaceURI:namespaceURI attributes:nil];
+		_XMLparser = [[NSXMLParser alloc] initWithContentsOfURL:theURL];
+		[self configureAndStartParser];
 	}
 	return self;
 }
+
+#pragma mark - XML Document Creation
+
++ (instancetype)documentWithContentsOfFile:(NSString *)xmlFilePath {
+	return [[[self class] alloc] initWithContentsOfFile:xmlFilePath];
+}
+
++ (instancetype)documentWithContentsOfString:(NSString *)string {
+	return [[[self class] alloc] initWithContentsOfString:string];
+}
+
++ (instancetype)documentWithFileURL:(NSURL *)theURL {
+    return [[[self class] alloc] initWithFileURL:theURL];
+}
+
+//+ (instancetype)documentWithRootElementName:(NSString *)elementName namespaces:(NSDictionary *)documentNamespaces attributes:(NSDictionary *)attributes {
+//	return [[[self class] alloc] initWithRootElementName:elementName namespaces:documentNamespaces attributes:attributes];
+//}
+//
+//- (instancetype)initWithRootElementName:(NSString *)elementName namespaces:(NSDictionary *)documentNamespaces attributes:(NSDictionary *)attributes {
+//	self = [self init];
+//	if (self) {
+//        _documentNamespaces = [NSMutableDictionary dictionaryWithDictionary:documentNamespaces];
+//
+//		_rootElement = [CNXMLElement elementWithName:elementName mappingPrefix:mappingPrefix attributes:nil];
+//		_rootElement = [CNXMLElement elementWithName:elementName mappingPrefix:<#(NSString *)#> attributes:<#(NSDictionary *)#>];
+//	}
+//	return self;
+//}
 
 #pragma mark - Private Helper
 
@@ -113,39 +125,33 @@
 	}
 }
 
-#pragma mark - XML Content Representation
-
-- (NSString *)xmlStringRepresentation {
-	NSString *documentString = nil;
-	if (self.rootElement != nil) {
-		documentString = @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-		documentString = [documentString stringByAppendingString:[self.rootElement xmlStringRepresentation]];
-	}
-	return documentString;
-}
-
-- (NSData *)xmlDataRepresentation {
-	return [[self xmlStringRepresentation] dataUsingEncoding:NSUTF8StringEncoding];
-}
-
 #pragma mark - NSXMLParser Delegate
 
 - (void)parser:(NSXMLParser *)parser didStartMappingPrefix:(NSString *)prefix toURI:(NSString *)namespaceURI {
-	_mappingPrefix = prefix;
-	_namespaceURI = namespaceURI;
+//    NSLog(@"didStartMappingPrefix: %@", prefix);
+//    [_documentNamespaces setObject:namespaceURI forKey:prefix];
+}
+
+- (void)parser:(NSXMLParser *)parser didEndMappingPrefix:(NSString *)prefix {
+//    NSLog(@"didEndMappingPrefix: %@", prefix);
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)currentElement namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributes {
-	CNXMLElement *element = [CNXMLElement elementWithName:currentElement mappingPrefix:self.mappingPrefix namespaceURI:self.namespaceURI attributes:attributes];
+//    NSLog(@"didStartElement: %@, qualifiedName: %@, attributes: %@", currentElement, qualifiedName, attributes);
+
+    self.currentElementName = currentElement;
+
+	CNXMLElement *element = [CNXMLElement elementWithName:self.currentElementName mappingPrefix:qualifiedName.prefix attributes:attributes];
 	CNXMLElement *parent = [_elementStack lastObject];
 
 	/// this is our root element
 	if ([_elementStack count] == 0) {
-		_elementName = currentElement;
 		self.rootElement = element;
 		self.rootElement.root = YES;
+        self.rootElement.level = 0;
 	}
 	else {
+        element.level = parent.level + 1;
 		[parent addChild:element];
 	}
 
@@ -154,18 +160,25 @@
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)currentElement namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)mappingPrefix {
+//    NSLog(@"didEndElement: %@, namespaceURI: %@, mappingPrefix: %@", currentElement, namespaceURI, mappingPrefix);
 	CNXMLElement *lastElement = [_elementStack lastObject];
 	if ([[lastElement elementName] isEqualToString:currentElement]) {
-		lastElement.value = [_foundCharacters copy];
+		lastElement.value = _foundCharacters;
 		[_elementStack removeObject:lastElement];
-		_foundCharacters = [NSMutableString stringWithString:CNStringEmpty];
+		_foundCharacters = [NSMutableString stringWithString:CNXMLStringEmpty];
 	}
+    self.currentElementName = nil;
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-	if (![string isEqualToString:CNStringEmpty]) {
-		[_foundCharacters appendString:string];
+	if (![string isEqualToString:CNXMLStringEmpty]) {
+        if ([self.currentElementName isEqualToString:F4ElementNameParagraph]) {
+            [_foundCharacters appendString:string];
+        }
 	}
+    else {
+		_foundCharacters = [NSMutableString stringWithString:CNXMLStringEmpty];
+    }
 }
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError {

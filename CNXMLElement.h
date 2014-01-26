@@ -29,58 +29,65 @@
  */
 
 
-#import <Foundation/Foundation.h>
 
-
-extern NSString *CNStringEmpty;
+extern NSString *CNXMLStringEmpty;
 
 @interface CNXMLElement : NSObject
 
 /** @name  XML Element Creation */
 #pragma mark - XML Element Creation
 
-+ (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix namespaceURI:(NSString *)namespaceURI attributes:(NSDictionary *)attributes;
-- (instancetype)initWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix namespaceURI:(NSString *)namespaceURI attributes:(NSDictionary *)attributes;
++ (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
+- (instancetype)initWithName:(NSString *)theName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
+
+/** @name Handling Namespaces */
+#pragma mark - Handling Namespaces
+
+- (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI;
+//- (NSDictionary *)namespaces;
+- (NSString *)prefixForNamespaceURI:(NSString *)theNamespaceURI;
 
 
 /** @name XML Element Properties */
 #pragma mark - XML Element Properties
 
-@property (strong, nonatomic, readonly) NSString *mappingPrefix;
-@property (strong, nonatomic, readonly) NSString *namespaceURI;
-@property (strong, nonatomic, readonly) NSString *elementName;
+@property (strong, readonly) NSString *mappingPrefix;
+@property (strong, readonly) NSString *elementName;
 @property (strong, nonatomic, readonly) NSDictionary *attributes;
 @property (assign, getter = isRoot) BOOL root;
 @property (strong) NSString *value;
+@property (assign) NSUInteger level;
 
 
 /** @name Handling XML Element Attributes */
 #pragma mark - Handling XML Element Attributes
 
-- (void)setValue:(id)attributeValue forAttribute:(NSString *)attributeName;
-- (id)valueForAttribute:(NSString *)attributeName;
-- (void)removeAttribute:(NSString *)attributeName;
-- (NSString *)attributesStringRepresentation;
-- (BOOL)hasAttribute:(NSString *)attributeName;
+- (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute;
+- (id)valueForAttribute:(NSString *)theAttribute;
+- (void)removeAttribute:(NSString *)theAttribute;
+- (NSString *)attributesString;
+- (BOOL)hasAttribute:(NSString *)theAttribute;
 
 
 /** @name Content Representation */
 #pragma mark - Content Representation
 
-@property (strong, nonatomic, readonly) NSString *xmlStringRepresentation;
+- (NSString *)XMLString;
+- (NSString *)XMLStringMinified;
 
 
 /** @name Handling Child Elements */
 #pragma mark - Handling Child Elements
 
-- (NSArray *)childs;
-- (void)addChild:(CNXMLElement *)childElement;
-- (void)removeChild:(CNXMLElement *)childElement;
-- (void)removeChildWithName:(NSString *)elementName;
+- (BOOL)hasChildren;
+- (NSArray *)children;
+- (void)addChild:(CNXMLElement *)theChild;
+- (void)removeChild:(CNXMLElement *)theChild;
+- (void)removeChildWithName:(NSString *)theChildName;
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes;
-- (void)removeAllChilds;
-- (void)enumerateChildsUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block;
-- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void(^) (CNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL * stop))block;
-- (CNXMLElement *)childWithName:(NSString *)elementName;
+- (void)removeAllChildren;
+- (void)enumerateChildrenUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block;
+- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void (^)(CNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL *stop))block;
+- (CNXMLElement *)childWithName:(NSString *)theChildName;
 
 @end

@@ -15,11 +15,11 @@ You have to replace the `$DIR_WHERE_YOUR_SUBMODULES_ARE_PLACED` with the real pa
 
 
 ####Via Drag&Drop
-Just drag the `CNXMLReader.*` and `CNXMLElement.*` files into your project.
+Just drag the `CNXMLReader.*`, `CNXMLElement.*` and `*CNXMLAdditions.*` files into your project.
 
 
 ##Requirements
-`CNXML` was written using ARC and runs on 10.7 and above.
+`CNXML` was written using ARC and runs on 10.7 and iOS 6 and above.
 
 
 ##Contribution

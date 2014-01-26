@@ -28,22 +28,22 @@
  THE SOFTWARE.
  */
 
-
 #import "CNXMLElement.h"
+#import "NSMutableString+CNXMLAdditions.h"
 
 
-NSString *CNStringEmpty = @"";
+NSString *CNXMLStringEmpty = @"";
 
 @interface CNXMLElement () {
 	NSString *_mappingPrefix;
-	NSString *_namespaceURI;
 	NSString *_elementName;
+	NSString *_qualifiedName;
 	NSMutableDictionary *_attributes;
 
 	NSString *_startTag;
 	NSString *_endTag;
-	NSMutableArray *_childs;
-	NSString *_stringRepresentation;
+	NSMutableArray *_children;
+	NSMutableDictionary *_namespaces;
 }
 @end
 
@@ -53,78 +53,131 @@ NSString *CNStringEmpty = @"";
 - (id)init {
 	self = [super init];
 	if (self) {
-		_attributes = [NSMutableDictionary new];
+		_mappingPrefix = CNXMLStringEmpty;
+		_attributes = [[NSMutableDictionary alloc] init];
+		_qualifiedName = CNXMLStringEmpty;
+		_namespaces = [[NSMutableDictionary alloc] init];
+
 		_root = NO;
-		_value = CNStringEmpty;
-		_startTag = CNStringEmpty;
-		_endTag = CNStringEmpty;
-		_mappingPrefix = CNStringEmpty;
-		_namespaceURI = CNStringEmpty;
-		_childs = [NSMutableArray new];
-		_stringRepresentation = CNStringEmpty;
+		_value = CNXMLStringEmpty;
+		_startTag = CNXMLStringEmpty;
+		_endTag = CNXMLStringEmpty;
+		_children = [[NSMutableArray alloc] init];
+        _level = 0;
 	}
 	return self;
 }
 
 #pragma mark - XML Element Creation
 
-+ (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix namespaceURI:(NSString *)namespaceURI attributes:(NSDictionary *)attributes {
-	return [[[self class] alloc] initWithName:elementName mappingPrefix:mappingPrefix namespaceURI:namespaceURI attributes:attributes];
++ (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes {
+	return [[[self class] alloc] initWithName:elementName mappingPrefix:mappingPrefix attributes:attributes];
 }
 
-- (instancetype)initWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix namespaceURI:(NSString *)namespaceURI attributes:(NSDictionary *)attributes {
+- (instancetype)initWithName:(NSString *)theName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes {
 	self = [self init];
 	if (self) {
-		_mappingPrefix = mappingPrefix;
-		_namespaceURI = namespaceURI;
-		_elementName = elementName;
-        if (attributes) _attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
-        else            _attributes = [NSMutableDictionary new];
+		_elementName = theName;
+		_mappingPrefix = (mappingPrefix ? : @"");
+		_qualifiedName = ([_mappingPrefix isEmptyString] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
+
+		if (attributes)
+			_attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
+		else
+			_attributes = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
 
+#pragma mark - Handling Namespaces
+
+- (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI {
+	[_namespaces setObject:theNamespaceURI forKey:[NSString stringWithFormat:@"xmlns:%@", thePrefix]];
+}
+
+- (NSString *)prefixForNamespaceURI:(NSString *)theNamespaceURI {
+	__block NSString *prefix = nil;
+	[_namespaces enumerateKeysAndObjectsUsingBlock: ^(NSString *key, NSString *currentNamespaceURI, BOOL *stop) {
+	    if ([currentNamespaceURI isEqualToString:theNamespaceURI]) {
+	        prefix = key;
+	        *stop = YES;
+		}
+	}];
+	return prefix;
+}
+
 #pragma mark - XML Content Representation
 
-- (NSString *)xmlStringRepresentation {
-	_stringRepresentation = [self startTag];
+- (NSString *)XMLString {
+    return [self _XMLStringFormatted:YES];
+}
 
-	if (![[self trimmedValue] isEqualToString:CNStringEmpty]) {
-		_stringRepresentation = [_stringRepresentation stringByAppendingString:self.value];
+- (NSString *)XMLStringMinified {
+    return [self _XMLStringFormatted:NO];
+}
+
+- (NSString *)_XMLStringFormatted:(BOOL)isFormatted {
+    NSMutableString *XMLString = [NSMutableString stringWithString:CNXMLStringEmpty];
+    NSString *TAB = CNXMLStringEmpty, *CRLF = CNXMLStringEmpty;
+    NSString *XMLStartTag = [self startTag];
+    NSString *XMLEndTag = [self endTag];
+
+    if (isFormatted) {
+        TAB = [TAB stringByPaddingToLength:self.level withString:@"\t" startingAtIndex:0];
+        CRLF = @"\n";
+    }
+
+    if (self.isRoot) {
+        [XMLString appendString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"];
+    }
+
+    if ([self hasChildren]) {
+        NSString *valueString = CNXMLStringEmpty;
+        for (CNXMLElement *child in [self children]) {
+		    valueString = [valueString stringByAppendingString:(isFormatted ? [child XMLString] : [child XMLStringMinified])];
+        }
+
+        [XMLString appendObjects:@[
+                       CRLF, TAB, XMLStartTag,
+                       TAB, valueString,
+                       CRLF, TAB, XMLEndTag
+                   ]];
 	}
 	else {
-		[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
-		    _stringRepresentation = [_stringRepresentation stringByAppendingString:[child xmlStringRepresentation]];
-		}];
+        if ([self isSelfClosing]) {
+            [XMLString appendObjects:@[ CRLF, TAB, XMLStartTag ]];
+        } else {
+            [XMLString appendObjects:@[ CRLF, TAB, XMLStartTag, self.value, XMLEndTag ]];
+        }
 	}
-
-	_stringRepresentation = [_stringRepresentation stringByAppendingString:[self endTag]];
-
-	return _stringRepresentation;
+    
+	return XMLString;
 }
 
 #pragma mark - Handling XML Element Attributes
 
-- (void)setValue:(id)attributeValue forAttribute:(NSString *)attributeName {
-	if (attributeName != nil && ![attributeName isEqualToString:CNStringEmpty])
-		[_attributes setObject:attributeValue forKey:attributeName];
+- (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute {
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLStringEmpty])
+		[_attributes setObject:theValue forKey:theAttribute];
 }
 
-- (id)valueForAttribute:(NSString *)attributeName {
-	__block id attributeValue = nil;
-	if (_attributes && [_attributes count] > 0 && ![attributeName isEqualToString:CNStringEmpty]) {
-		attributeValue = [_attributes objectForKey:attributeName];
+- (id)valueForAttribute:(NSString *)theAttribute {
+	id attributeValue = nil;
+	if (_attributes && [_attributes count] > 0 &&
+	    ![theAttribute isEqualToString:CNXMLStringEmpty]) {
+		attributeValue = [_attributes objectForKey:theAttribute];
 	}
 	return attributeValue;
 }
 
-- (void)removeAttribute:(NSString *)attributeName {
-	if (attributeName != nil && ![attributeName isEqualToString:CNStringEmpty] && [_attributes objectForKey:attributeName])
-		[_attributes removeObjectForKey:attributeName];
+- (void)removeAttribute:(NSString *)theAttribute {
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLStringEmpty] &&
+	    [_attributes objectForKey:theAttribute])
+		[_attributes removeObjectForKey:theAttribute];
 }
 
-- (NSString *)attributesStringRepresentation {
-	__block NSString *attributesString = CNStringEmpty;
+- (NSString *)attributesString {
+	__block NSString *attributesString = CNXMLStringEmpty;
 	if ([_attributes count] > 0) {
 		[_attributes enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
 		    attributesString = [attributesString stringByAppendingFormat:@" %@=\"%@\"", key, obj];
@@ -133,146 +186,114 @@ NSString *CNStringEmpty = @"";
 	return attributesString;
 }
 
-- (BOOL)hasAttribute:(NSString *)attributeName {
-    __block BOOL hasAttribute = NO;
-    [_attributes enumerateKeysAndObjectsUsingBlock:^(NSString *currentAttribute, id obj, BOOL *stop) {
-        if ([currentAttribute isEqualToString:attributeName]) {
-            hasAttribute = YES;
-            *stop = YES;
-        }
-    }];
-    return hasAttribute;
+- (BOOL)hasAttribute:(NSString *)theAttribute {
+	__block BOOL hasAttribute = NO;
+	[_attributes enumerateKeysAndObjectsUsingBlock: ^(NSString *currentAttribute, id obj, BOOL *stop) {
+	    if ([currentAttribute isEqualToString:theAttribute]) {
+	        hasAttribute = YES;
+	        *stop = YES;
+		}
+	}];
+	return hasAttribute;
 }
-
 
 #pragma mark - Handling Child Elements
 
-- (NSArray *)childs
-{
-    return _childs;
+- (BOOL)hasChildren {
+    return (_children && [_children count] > 0);
 }
 
-- (void)addChild:(CNXMLElement *)childElement {
-	if (childElement != nil)
-		[_childs addObject:childElement];
+- (NSArray *)children {
+	return _children;
 }
 
-- (void)removeChild:(CNXMLElement *)childElement {
-	if ([_childs count] > 0) {
-		[_childs removeObject:childElement];
+- (void)addChild:(CNXMLElement *)theChild {
+	if (theChild != nil)
+		[_children addObject:theChild];
+}
+
+- (void)removeChild:(CNXMLElement *)theChild {
+	if ([_children count] > 0) {
+		[_children removeObject:theChild];
 	}
 }
 
-- (void)removeChildWithName:(NSString *)elementName {
+- (void)removeChildWithName:(NSString *)theChildName {
 	__block CNXMLElement *childToRemove = nil;
-	[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
-	    if ([currentChild.elementName isEqualToString:elementName]) {
+	[_children enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
+	    if ([currentChild.elementName isEqualToString:theChildName]) {
 	        childToRemove = currentChild;
 	        *stop = YES;
 		}
 	}];
 	if (childToRemove)
-		[_childs removeObject:childToRemove];
+		[_children removeObject:childToRemove];
 }
 
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes {
 	__block CNXMLElement *childToRemove = nil;
-	[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
+	[_children enumerateObjectsUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
 	    if ([child.attributes isEqualToDictionary:attibutes]) {
 	        childToRemove = child;
 	        *stop = YES;
 		}
 	}];
 	if (childToRemove)
-		[_childs removeObject:childToRemove];
+		[_children removeObject:childToRemove];
 }
 
-- (void)removeAllChilds {
-	[_childs removeAllObjects];
+- (void)removeAllChildren {
+	[_children removeAllObjects];
 }
 
-- (void)enumerateChildsUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block {
-	[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
+- (void)enumerateChildrenUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block {
+	[_children enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
 	    block(currentChild, idx, stop);
 	}];
 }
 
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL isLastChild, BOOL *stop))block {
-	[_childs enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
-	    if ([currentChild.elementName isEqualToString:elementName]) {
-            NSInteger lastChildIndex = 0;
-            if ([[currentChild childs] count] > 0)
-                lastChildIndex = [[currentChild childs] count] - 1;
+	CNXMLElement *enumElement = [self childWithName:elementName];
+	NSInteger lastChildIndex = 0;
+	if ([[enumElement children] count] > 0)
+		lastChildIndex = [[enumElement children] count] - 1;
 
-            [currentChild enumerateChildsUsingBlock:^(CNXMLElement *child, NSUInteger childIndex, BOOL *stop) {
-	            block(child, childIndex, (lastChildIndex == childIndex), stop);
-            }];
-	        *stop = YES;
-		}
+	[enumElement enumerateChildrenUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
+	    block(child, idx, (lastChildIndex == idx), stop);
 	}];
 }
 
-- (CNXMLElement *)childWithName:(NSString *)elementName {
+- (CNXMLElement *)childWithName:(NSString *)theChildName {
 	__block CNXMLElement *requestedChild = nil;
-    [self enumerateChildsUsingBlock:^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
-	    if ([child.elementName isEqualToString:elementName]) {
+	[self enumerateChildrenUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
+	    if ([child.elementName isEqualToString:theChildName]) {
 	        requestedChild = child;
 	        *stop = YES;
 		}
-    }];
+	}];
 	return requestedChild;
-}
-
-#pragma mark - Accessors
-
-- (NSString *)mappingPrefix {
-	return _mappingPrefix;
-}
-
-- (NSString *)namespaceURI {
-	return _namespaceURI;
-}
-
-- (NSString *)elementName {
-	return _elementName;
 }
 
 #pragma mark - Private Helper
 
-- (BOOL)hasNameSpace {
-	return (_mappingPrefix != nil && ![_mappingPrefix isEqualToString:CNStringEmpty]);
-}
-
 - (BOOL)isSelfClosing {
-	return ([_childs count] == 0 && [[self trimmedValue] isEqualToString:CNStringEmpty]);
+	return (![self hasChildren] && [[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLStringEmpty]/* && ![self.elementName isEqualToString:F4ElementNameParagraph]*/);
 }
 
 - (NSString *)startTag {
-	if (self.isRoot) {
-		if ([self hasNameSpace]) _startTag = [NSString stringWithFormat:@"<%@:%@ xmlns:%@=\"%@\"", _mappingPrefix, _elementName, _mappingPrefix, _namespaceURI];
-		else _startTag = [NSString stringWithFormat:@"<%@", _elementName];
-	}
-	else {
-		if ([self hasNameSpace]) _startTag = [NSString stringWithFormat:@"<%@:%@%@", _mappingPrefix, _elementName, [self attributesStringRepresentation]];
-		else _startTag = [NSString stringWithFormat:@"<%@", _elementName];
-	}
-
-	if ([self isSelfClosing]) _startTag = [_startTag stringByAppendingString:@"/>"];
-	else _startTag = [_startTag stringByAppendingString:@">"];
-
+	_startTag = [NSString stringWithFormat:@"<%@%@%@", _qualifiedName, [self attributesString], ([self isSelfClosing] ? @"/>" : @">")];
 	return _startTag;
 }
 
 - (NSString *)endTag {
 	if (![self isSelfClosing]) {
-		if ([self hasNameSpace]) _endTag = [NSString stringWithFormat:@"</%@:%@>", _mappingPrefix, _elementName];
-		else _endTag = [NSString stringWithFormat:@"</%@>", _elementName];
+		_endTag = [NSString stringWithFormat:@"</%@>", _qualifiedName];
 	}
 	return _endTag;
 }
 
-- (NSString *)trimmedValue {
-	return [self.value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+- (NSString *)whitespaceAndNewlineTrimmedValue {
+	return [self.value stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
 @end

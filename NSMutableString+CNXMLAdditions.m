@@ -1,8 +1,9 @@
 //
-//  CNXMLReader.h
+//  NSMutableString+CNXMLAdditions.m
+//  f4analyse
 //
-//  Created by Frank Gregor on 18.06.13.
-//  Copyright (c) 2013 cocoa:naut. All rights reserved.
+//  Created by Frank Gregor on 26/01/14.
+//  Copyright (c) 2014 cocoa:naut. All rights reserved.
 //
 
 /*
@@ -28,35 +29,14 @@
  THE SOFTWARE.
  */
 
+#import "NSMutableString+CNXMLAdditions.h"
 
-#import "CNXMLElement.h"
+@implementation NSMutableString (CNXMLAdditions)
 
-
-@interface CNXMLReader : NSObject <NSXMLParserDelegate>
-
-/** @name Reading XML Documents */
-#pragma mark - Reading XML Documents
-
-+ (instancetype)documentWithContentsOfFile:(NSString *)xmlFilePath;
-- (instancetype)initWithContentsOfFile:(NSString *)xmlFilePath;
-
-+ (instancetype)documentWithContentsOfString:(NSString *)string;
-- (instancetype)initWithContentsOfString:(NSString *)string;
-
-+ (instancetype)documentWithFileURL:(NSURL *)theURL;
-- (instancetype)initWithFileURL:(NSURL *)theURL;
-
-
-/** @name Creating XML Documents */
-#pragma mark - Creating XML Documents
-
-//+ (instancetype)documentWithRootElementName:(NSString *)elementName namespaces:(NSDictionary *)documentNamespaces attributes:(NSDictionary *)attributes;
-//- (instancetype)initWithRootElementName:(NSString *)elementName namespaces:(NSDictionary *)documentNamespaces attributes:(NSDictionary *)attributes;
-
-
-/** @name XML Document Properties */
-#pragma mark - XML Document Properties
-
-@property (strong, nonatomic) CNXMLElement *rootElement;
+- (void)appendObjects:(NSArray *)theObjects {
+    for (id theObject in theObjects) {
+        [self appendFormat:@"%@", theObject];
+    }
+}
 
 @end
