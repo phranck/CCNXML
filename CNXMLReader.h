@@ -47,13 +47,6 @@
 - (instancetype)initWithFileURL:(NSURL *)theURL;
 
 
-/** @name Creating XML Documents */
-#pragma mark - Creating XML Documents
-
-//+ (instancetype)documentWithRootElementName:(NSString *)elementName namespaces:(NSDictionary *)documentNamespaces attributes:(NSDictionary *)attributes;
-//- (instancetype)initWithRootElementName:(NSString *)elementName namespaces:(NSDictionary *)documentNamespaces attributes:(NSDictionary *)attributes;
-
-
 /** @name XML Document Properties */
 #pragma mark - XML Document Properties
 

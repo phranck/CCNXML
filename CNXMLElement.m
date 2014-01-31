@@ -32,19 +32,25 @@
 #import "NSMutableString+CNXMLAdditions.h"
 
 
-NSString *CNXMLStringEmpty = @"";
+NSString *const CNXMLStringEmpty = @"";
+static NSString *const CNXMLStartTagBeginFormatString = @"<%@%@%@";
+static NSString *const CNXMLStartTagEndFormatString = @">";
+static NSString *const CNXMLStartTagEndSelfClosingFormatString = @"/>";
+static NSString *const CNXMLEndTagFormatString = @"</%@>";
+static NSString *const CNXMLAttributePlaceholderFormatString = @" %@=\"%@\"";
+static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
 
 @interface CNXMLElement () {
 	NSString *_mappingPrefix;
 	NSString *_elementName;
 	NSString *_qualifiedName;
 	NSMutableDictionary *_attributes;
-
-	NSString *_startTag;
-	NSString *_endTag;
 	NSMutableArray *_children;
 	NSMutableDictionary *_namespaces;
 }
+@property (strong, nonatomic) NSString *startTag;
+@property (strong, nonatomic) NSString *endTag;
 @end
 
 @implementation CNXMLElement
@@ -97,9 +103,9 @@ NSString *CNXMLStringEmpty = @"";
 
 - (NSString *)prefixForNamespaceURI:(NSString *)theNamespaceURI {
 	__block NSString *prefix = nil;
-	[_namespaces enumerateKeysAndObjectsUsingBlock: ^(NSString *key, NSString *currentNamespaceURI, BOOL *stop) {
+	[_namespaces enumerateKeysAndObjectsUsingBlock: ^(NSString *currentPrefix, NSString *currentNamespaceURI, BOOL *stop) {
 	    if ([currentNamespaceURI isEqualToString:theNamespaceURI]) {
-	        prefix = key;
+	        prefix = currentPrefix;
 	        *stop = YES;
 		}
 	}];
@@ -128,7 +134,7 @@ NSString *CNXMLStringEmpty = @"";
     }
 
     if (self.isRoot) {
-        [XMLString appendString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"];
+        [XMLString appendString:CNXMLVersionAndEncodingHeaderString];
     }
 
     if ([self hasChildren]) {
@@ -179,8 +185,8 @@ NSString *CNXMLStringEmpty = @"";
 - (NSString *)attributesString {
 	__block NSString *attributesString = CNXMLStringEmpty;
 	if ([_attributes count] > 0) {
-		[_attributes enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
-		    attributesString = [attributesString stringByAppendingFormat:@" %@=\"%@\"", key, obj];
+		[_attributes enumerateKeysAndObjectsUsingBlock: ^(id attributeName, id attributeValue, BOOL *stop) {
+		    attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, attributeName, attributeValue];
 		}];
 	}
 	return attributesString;
@@ -188,24 +194,16 @@ NSString *CNXMLStringEmpty = @"";
 
 - (BOOL)hasAttribute:(NSString *)theAttribute {
 	__block BOOL hasAttribute = NO;
-	[_attributes enumerateKeysAndObjectsUsingBlock: ^(NSString *currentAttribute, id obj, BOOL *stop) {
+    for (NSString *currentAttribute in _attributes) {
 	    if ([currentAttribute isEqualToString:theAttribute]) {
 	        hasAttribute = YES;
-	        *stop = YES;
+	        break;
 		}
-	}];
+    }
 	return hasAttribute;
 }
 
 #pragma mark - Handling Child Elements
-
-- (BOOL)hasChildren {
-    return (_children && [_children count] > 0);
-}
-
-- (NSArray *)children {
-	return _children;
-}
 
 - (void)addChild:(CNXMLElement *)theChild {
 	if (theChild != nil)
@@ -274,22 +272,30 @@ NSString *CNXMLStringEmpty = @"";
 	return requestedChild;
 }
 
-#pragma mark - Private Helper
+#pragma mark - Public Custom Accessors
 
-- (BOOL)isSelfClosing {
-	return (![self hasChildren] && [[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLStringEmpty]/* && ![self.elementName isEqualToString:F4ElementNameParagraph]*/);
+- (BOOL)hasChildren {
+    return (_children && [_children count] > 0);
 }
 
+#pragma mark - Private Custom Accessors
+
 - (NSString *)startTag {
-	_startTag = [NSString stringWithFormat:@"<%@%@%@", _qualifiedName, [self attributesString], ([self isSelfClosing] ? @"/>" : @">")];
+	_startTag = [NSString stringWithFormat:CNXMLStartTagBeginFormatString, _qualifiedName, [self attributesString], ([self isSelfClosing] ? CNXMLStartTagEndSelfClosingFormatString : CNXMLStartTagEndFormatString)];
 	return _startTag;
 }
 
 - (NSString *)endTag {
 	if (![self isSelfClosing]) {
-		_endTag = [NSString stringWithFormat:@"</%@>", _qualifiedName];
+		_endTag = [NSString stringWithFormat:CNXMLEndTagFormatString, _qualifiedName];
 	}
 	return _endTag;
+}
+
+#pragma mark - Private Helper
+
+- (BOOL)isSelfClosing {
+	return (![self hasChildren] && [[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLStringEmpty]);
 }
 
 - (NSString *)whitespaceAndNewlineTrimmedValue {

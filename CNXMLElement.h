@@ -30,7 +30,8 @@
 
 
 
-extern NSString *CNXMLStringEmpty;
+FOUNDATION_EXPORT NSString *const CNXMLStringEmpty;
+
 
 @interface CNXMLElement : NSObject
 
@@ -53,7 +54,7 @@ extern NSString *CNXMLStringEmpty;
 
 @property (strong, readonly) NSString *mappingPrefix;
 @property (strong, readonly) NSString *elementName;
-@property (strong, nonatomic, readonly) NSDictionary *attributes;
+@property (strong, readonly) NSDictionary *attributes;
 @property (assign, getter = isRoot) BOOL root;
 @property (strong) NSString *value;
 @property (assign) NSUInteger level;
@@ -79,8 +80,8 @@ extern NSString *CNXMLStringEmpty;
 /** @name Handling Child Elements */
 #pragma mark - Handling Child Elements
 
-- (BOOL)hasChildren;
-- (NSArray *)children;
+@property (strong, readonly) NSArray *children;
+@property (assign, nonatomic, readonly) BOOL hasChildren;
 - (void)addChild:(CNXMLElement *)theChild;
 - (void)removeChild:(CNXMLElement *)theChild;
 - (void)removeChildWithName:(NSString *)theChildName;
