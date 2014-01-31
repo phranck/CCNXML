@@ -32,7 +32,7 @@
 #import "NSMutableString+CNXMLAdditions.h"
 
 
-NSString *const CNXMLStringEmpty = @"";
+NSString *const CNXMLEmptyString = @"";
 static NSString *const CNXMLStartTagBeginFormatString = @"<%@%@%@";
 static NSString *const CNXMLStartTagEndFormatString = @">";
 static NSString *const CNXMLStartTagEndSelfClosingFormatString = @"/>";
@@ -59,15 +59,15 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 - (id)init {
 	self = [super init];
 	if (self) {
-		_mappingPrefix = CNXMLStringEmpty;
+		_mappingPrefix = CNXMLEmptyString;
 		_attributes = [[NSMutableDictionary alloc] init];
-		_qualifiedName = CNXMLStringEmpty;
+		_qualifiedName = CNXMLEmptyString;
 		_namespaces = [[NSMutableDictionary alloc] init];
 
 		_root = NO;
-		_value = CNXMLStringEmpty;
-		_startTag = CNXMLStringEmpty;
-		_endTag = CNXMLStringEmpty;
+		_value = CNXMLEmptyString;
+		_startTag = CNXMLEmptyString;
+		_endTag = CNXMLEmptyString;
 		_children = [[NSMutableArray alloc] init];
         _level = 0;
 	}
@@ -84,8 +84,8 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	self = [self init];
 	if (self) {
 		_elementName = theName;
-		_mappingPrefix = (mappingPrefix ? : CNXMLStringEmpty);
-		_qualifiedName = ([_mappingPrefix isEqualToString:CNXMLStringEmpty] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
+		_mappingPrefix = (mappingPrefix ? : CNXMLEmptyString);
+		_qualifiedName = ([_mappingPrefix isEqualToString:CNXMLEmptyString] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
 
 		if (attributes)
 			_attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
@@ -123,8 +123,8 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 }
 
 - (NSString *)_XMLStringFormatted:(BOOL)isFormatted {
-    NSMutableString *XMLString = [NSMutableString stringWithString:CNXMLStringEmpty];
-    NSString *TAB = CNXMLStringEmpty, *CRLF = CNXMLStringEmpty;
+    NSMutableString *XMLString = [NSMutableString stringWithString:CNXMLEmptyString];
+    NSString *TAB = CNXMLEmptyString, *CRLF = CNXMLEmptyString;
     NSString *XMLStartTag = [self startTag];
     NSString *XMLEndTag = [self endTag];
 
@@ -138,7 +138,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
     }
 
     if ([self hasChildren]) {
-        NSString *valueString = CNXMLStringEmpty;
+        NSString *valueString = CNXMLEmptyString;
         for (CNXMLElement *child in [self children]) {
 		    valueString = [valueString stringByAppendingString:(isFormatted ? [child XMLString] : [child XMLStringMinified])];
         }
@@ -163,27 +163,27 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 #pragma mark - Handling XML Element Attributes
 
 - (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute {
-	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLStringEmpty])
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString])
 		[_attributes setObject:theValue forKey:theAttribute];
 }
 
 - (id)valueForAttribute:(NSString *)theAttribute {
 	id attributeValue = nil;
 	if (_attributes && [_attributes count] > 0 &&
-	    ![theAttribute isEqualToString:CNXMLStringEmpty]) {
+	    ![theAttribute isEqualToString:CNXMLEmptyString]) {
 		attributeValue = [_attributes objectForKey:theAttribute];
 	}
 	return attributeValue;
 }
 
 - (void)removeAttribute:(NSString *)theAttribute {
-	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLStringEmpty] &&
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString] &&
 	    [_attributes objectForKey:theAttribute])
 		[_attributes removeObjectForKey:theAttribute];
 }
 
 - (NSString *)attributesString {
-	__block NSString *attributesString = CNXMLStringEmpty;
+	__block NSString *attributesString = CNXMLEmptyString;
 	if ([_attributes count] > 0) {
 		[_attributes enumerateKeysAndObjectsUsingBlock: ^(id attributeName, id attributeValue, BOOL *stop) {
 		    attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, attributeName, attributeValue];
@@ -295,7 +295,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 #pragma mark - Private Helper
 
 - (BOOL)isSelfClosing {
-	return (![self hasChildren] && [[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLStringEmpty]);
+	return (![self hasChildren] && [[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLEmptyString]);
 }
 
 - (NSString *)whitespaceAndNewlineTrimmedValue {
