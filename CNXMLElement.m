@@ -62,7 +62,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 		_mappingPrefix = CNXMLEmptyString;
 		_attributes = [[NSMutableDictionary alloc] init];
 		_qualifiedName = CNXMLEmptyString;
-		_namespaces = [[NSMutableDictionary alloc] init];
+		_namespaces = nil;
 
 		_root = NO;
 		_value = CNXMLEmptyString;
@@ -95,10 +95,12 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	return self;
 }
 
-#pragma mark - Handling Namespaces
+#pragma mark - Managing Namespaces
 
 - (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI {
-	[_namespaces setObject:theNamespaceURI forKey:[NSString stringWithFormat:@"xmlns:%@", thePrefix]];
+    NSString *key = [NSString stringWithFormat:@"xmlns:%@", thePrefix];
+    if (!_namespaces) _namespaces = [NSMutableDictionary new];
+    _namespaces[key] = theNamespaceURI;
 }
 
 - (NSString *)prefixForNamespaceURI:(NSString *)theNamespaceURI {
@@ -160,31 +162,39 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	return XMLString;
 }
 
-#pragma mark - Handling XML Element Attributes
+#pragma mark - Managing XML Element Attributes
 
 - (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute {
 	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString])
-		[_attributes setObject:theValue forKey:theAttribute];
+        _attributes[theAttribute] = theValue;
 }
 
 - (id)valueForAttribute:(NSString *)theAttribute {
 	id attributeValue = nil;
 	if (_attributes && [_attributes count] > 0 &&
 	    ![theAttribute isEqualToString:CNXMLEmptyString]) {
-		attributeValue = [_attributes objectForKey:theAttribute];
+		attributeValue = _attributes[theAttribute];
 	}
 	return attributeValue;
 }
 
 - (void)removeAttribute:(NSString *)theAttribute {
-	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString] &&
-	    [_attributes objectForKey:theAttribute])
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString] && _attributes[theAttribute])
 		[_attributes removeObjectForKey:theAttribute];
 }
 
 - (NSString *)attributesString {
 	__block NSString *attributesString = CNXMLEmptyString;
-	if ([_attributes count] > 0) {
+
+    // handling namespaces
+    if (self.isRoot && _namespaces != nil) {
+        [_namespaces enumerateKeysAndObjectsUsingBlock:^(NSString *prefix, NSString *namespaceURI, BOOL *stop) {
+            attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, prefix, namespaceURI];
+        }];
+    }
+
+    // handling attributes
+    if ([_attributes count] > 0) {
 		[_attributes enumerateKeysAndObjectsUsingBlock: ^(id attributeName, id attributeValue, BOOL *stop) {
 		    attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, attributeName, attributeValue];
 		}];
@@ -203,7 +213,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	return hasAttribute;
 }
 
-#pragma mark - Handling Child Elements
+#pragma mark - Managing Child Elements
 
 - (void)addChild:(CNXMLElement *)theChild {
 	if (theChild != nil)

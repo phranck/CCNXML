@@ -30,7 +30,7 @@
 
 
 
-FOUNDATION_EXPORT NSString *const CNXMLStringEmpty;
+FOUNDATION_EXPORT NSString *const CNXMLEmptyString;
 
 
 @interface CNXMLElement : NSObject
@@ -41,8 +41,8 @@ FOUNDATION_EXPORT NSString *const CNXMLStringEmpty;
 + (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
 - (instancetype)initWithName:(NSString *)theName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
 
-/** @name Handling Namespaces */
-#pragma mark - Handling Namespaces
+/** @name Managing Namespaces */
+#pragma mark - Managing Namespaces
 
 - (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI;
 //- (NSDictionary *)namespaces;
@@ -60,8 +60,8 @@ FOUNDATION_EXPORT NSString *const CNXMLStringEmpty;
 @property (assign) NSUInteger level;
 
 
-/** @name Handling XML Element Attributes */
-#pragma mark - Handling XML Element Attributes
+/** @name Managing XML Element Attributes */
+#pragma mark - Managing XML Element Attributes
 
 - (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute;
 - (id)valueForAttribute:(NSString *)theAttribute;
@@ -77,8 +77,8 @@ FOUNDATION_EXPORT NSString *const CNXMLStringEmpty;
 - (NSString *)XMLStringMinified;
 
 
-/** @name Handling Child Elements */
-#pragma mark - Handling Child Elements
+/** @name Managing Child Elements */
+#pragma mark - Managing Child Elements
 
 @property (strong, readonly) NSArray *children;
 @property (assign, nonatomic, readonly) BOOL hasChildren;

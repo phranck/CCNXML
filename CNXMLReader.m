@@ -29,14 +29,26 @@
  */
 
 
-#import "NSString+CNXMLAdditions.h"
 #import "CNXMLReader.h"
+#import "NSString+CNXMLAdditions.h"
+
+
+NSString *const CNXMLParseErrorNotification                                 = @"CNXMLParseErrorNotification";
+NSString *const CNXMLValidationErrorNotification                            = @"CNXMLValidationErrorNotification";
+NSString *const CNXMLFoundStartElementNotification                          = @"CNXMLFoundStartElementNotification";
+NSString *const CNXMLFoundEndElementNotification                            = @"CNXMLFoundEndElementNotification";
+
+NSString *const CNXMLNotificationUserInfoDictParserKey                      = @"CNXMLNotificationUserInfoDictParserKey";
+NSString *const CNXMLNotificationUserInfoDictErrorKey                       = @"CNXMLNotificationUserInfoDictErrorKey";
+NSString *const CNXMLNotificationUserInfoDictCurrentElementKey              = @"CNXMLNotificationUserInfoDictCurrentElementKey";
+NSString *const CNXMLNotificationUserInfoDictCurrentElementAttributesKey    = @"CNXMLNotificationUserInfoDictCurrentElementAttributesKey";
 
 
 @interface CNXMLReader ()
 @property (strong) NSXMLParser *XMLparser;
 @property (strong) NSMutableString *foundCharacters;
 @property (strong) NSMutableArray *elementStack;
+@property (strong) NSMutableDictionary *documentNamespaces;
 @end
 
 @implementation CNXMLReader
@@ -47,6 +59,7 @@
 		_XMLparser = nil;
 		_elementStack = [[NSMutableArray alloc] init];
 		_foundCharacters = [[NSMutableString alloc] init];
+        _documentNamespaces = [[NSMutableDictionary alloc] init];
 		_rootElement = nil;
 	}
 	return self;
@@ -94,6 +107,7 @@
 	[_XMLparser setDelegate:self];
 	[_XMLparser setShouldReportNamespacePrefixes:YES];
 	[_XMLparser setShouldProcessNamespaces:YES];
+    [_XMLparser setShouldResolveExternalEntities:NO];
 	[_XMLparser parse];
 }
 
@@ -110,7 +124,9 @@
 #pragma mark - NSXMLParser Delegate
 
 - (void)parser:(NSXMLParser *)parser didStartMappingPrefix:(NSString *)prefix toURI:(NSString *)namespaceURI {
-//    [_documentNamespaces setObject:namespaceURI forKey:prefix];
+    self.documentNamespaces[prefix] = namespaceURI;
+    NSLog(@"didStartMappingPrefix: %@", prefix);
+    NSLog(@"toURI: %@", namespaceURI);
 }
 
 - (void)parser:(NSXMLParser *)parser didEndMappingPrefix:(NSString *)prefix {
@@ -121,11 +137,23 @@
 	CNXMLElement *parent = [self.elementStack lastObject];
     self.foundCharacters = [[NSMutableString alloc] init];
 
+    if ([currentElement isEqualToString:@"project"]) {
+        NSLog(@"attributes: %@", attributes);
+    }
+
 	/// this is our root element
 	if ([self.elementStack count] == 0) {
 		self.rootElement = element;
 		self.rootElement.root = YES;
         self.rootElement.level = 0;
+
+        if (self.documentNamespaces) {
+            __weak typeof(self) wSelf = self;
+            [self.documentNamespaces enumerateKeysAndObjectsUsingBlock:^(NSString *prefix, NSString *namespaceURI, BOOL *stop) {
+                [wSelf.rootElement addNamespaceWithPrefix:prefix namespaceURI:namespaceURI];
+            }];
+            self.documentNamespaces = [[NSMutableDictionary alloc] init];
+        }
 	}
 	else {
         element.level = parent.level + 1;
@@ -134,10 +162,17 @@
 
 	if (![[parent elementName] isEqualToString:currentElement])
 		[self.elementStack addObject:element];
+
+    NSDictionary *userInfo = @{
+        CNXMLNotificationUserInfoDictParserKey: parser,
+        CNXMLNotificationUserInfoDictCurrentElementKey: currentElement,
+        CNXMLNotificationUserInfoDictCurrentElementAttributesKey: attributes
+    };
+    [[NSNotificationCenter defaultCenter] postNotificationName:CNXMLFoundStartElementNotification object:nil userInfo:userInfo];
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-	if (![string isEqualToString:CNXMLStringEmpty]) {
+	if (![string isEqualToString:CNXMLEmptyString]) {
         [self.foundCharacters appendString:string];
 	}
 }
@@ -149,12 +184,21 @@
 		[self.elementStack removeObject:lastElement];
     }
     self.foundCharacters = nil;
+
+    NSDictionary *userInfo = @{ CNXMLNotificationUserInfoDictParserKey: parser, CNXMLNotificationUserInfoDictCurrentElementKey: currentElement };
+    [[NSNotificationCenter defaultCenter] postNotificationName:CNXMLFoundEndElementNotification object:nil userInfo:userInfo];
 }
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError {
+    NSAssert(!parseError, @"A XML parse error occured: %@", parseError);
+    NSDictionary *userInfo = @{ CNXMLNotificationUserInfoDictParserKey: parser, CNXMLNotificationUserInfoDictErrorKey: parseError };
+    [[NSNotificationCenter defaultCenter] postNotificationName:CNXMLParseErrorNotification object:nil userInfo:userInfo];
 }
 
 - (void)parser:(NSXMLParser *)parser validationErrorOccurred:(NSError *)validError {
+    NSAssert(!validError, @"A XML validation error occured: %@", validError);
+    NSDictionary *userInfo = @{ CNXMLNotificationUserInfoDictParserKey: parser, CNXMLNotificationUserInfoDictErrorKey: validError };
+    [[NSNotificationCenter defaultCenter] postNotificationName:CNXMLParseErrorNotification object:nil userInfo:userInfo];
 }
 
 @end
