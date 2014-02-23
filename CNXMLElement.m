@@ -87,10 +87,11 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 		_mappingPrefix = (mappingPrefix ? : CNXMLEmptyString);
 		_qualifiedName = ([_mappingPrefix isEqualToString:CNXMLEmptyString] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
 
-		if (attributes)
+		if (attributes) {
 			_attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
-		else
+		} else {
 			_attributes = [[NSMutableDictionary alloc] init];
+        }
 	}
 	return self;
 }
@@ -99,7 +100,9 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 
 - (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI {
     NSString *key = [NSString stringWithFormat:@"xmlns:%@", thePrefix];
-    if (!_namespaces) _namespaces = [NSMutableDictionary new];
+    if (!_namespaces) {
+        _namespaces = [NSMutableDictionary new];
+    }
     _namespaces[key] = theNamespaceURI;
 }
 
@@ -165,22 +168,23 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 #pragma mark - Managing XML Element Attributes
 
 - (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute {
-	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString])
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString]) {
         _attributes[theAttribute] = theValue;
+    }
 }
 
 - (id)valueForAttribute:(NSString *)theAttribute {
 	id attributeValue = nil;
-	if (_attributes && [_attributes count] > 0 &&
-	    ![theAttribute isEqualToString:CNXMLEmptyString]) {
+	if (_attributes && [_attributes count] > 0 && ![theAttribute isEqualToString:CNXMLEmptyString]) {
 		attributeValue = _attributes[theAttribute];
 	}
 	return attributeValue;
 }
 
 - (void)removeAttribute:(NSString *)theAttribute {
-	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString] && _attributes[theAttribute])
+	if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString] && _attributes[theAttribute]) {
 		[_attributes removeObjectForKey:theAttribute];
+    }
 }
 
 - (NSString *)attributesString {
@@ -216,8 +220,10 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 #pragma mark - Managing Child Elements
 
 - (void)addChild:(CNXMLElement *)theChild {
-	if (theChild != nil)
+	if (theChild != nil) {
+        theChild.level = self.level + 1;
 		[_children addObject:theChild];
+    }
 }
 
 - (void)removeChild:(CNXMLElement *)theChild {
@@ -234,8 +240,10 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	        *stop = YES;
 		}
 	}];
-	if (childToRemove)
+
+	if (childToRemove) {
 		[_children removeObject:childToRemove];
+    }
 }
 
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes {
@@ -246,8 +254,10 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	        *stop = YES;
 		}
 	}];
-	if (childToRemove)
+
+	if (childToRemove) {
 		[_children removeObject:childToRemove];
+    }
 }
 
 - (void)removeAllChildren {
@@ -263,8 +273,10 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL isLastChild, BOOL *stop))block {
 	CNXMLElement *enumElement = [self childWithName:elementName];
 	NSInteger lastChildIndex = 0;
-	if ([[enumElement children] count] > 0)
+
+	if ([[enumElement children] count] > 0) {
 		lastChildIndex = [[enumElement children] count] - 1;
+    }
 
 	[enumElement enumerateChildrenUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
 	    block(child, idx, (lastChildIndex == idx), stop);
@@ -305,7 +317,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 #pragma mark - Private Helper
 
 - (BOOL)isSelfClosing {
-	return (![self hasChildren] && [[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLEmptyString]);
+	return (![self hasChildren] && ([[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLEmptyString] || self.value == nil));
 }
 
 - (NSString *)whitespaceAndNewlineTrimmedValue {
