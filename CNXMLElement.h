@@ -32,6 +32,11 @@
 
 FOUNDATION_EXPORT NSString *const CNXMLEmptyString;
 
+typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
+    CNXMLContentIndentationTypeTab = 0,     // default
+    CNXMLContentIndentationTypeSpace
+};
+
 
 @interface CNXMLElement : NSObject
 
@@ -73,6 +78,8 @@ FOUNDATION_EXPORT NSString *const CNXMLEmptyString;
 /** @name Content Representation */
 #pragma mark - Content Representation
 
+@property (assign) CNXMLContentIndentationType indentationType;
+@property (assign) NSUInteger indentationWidth;                     // default 4 (only effective if indentationType is set to CNXMLContentIndentationTypeSpace)
 - (NSString *)XMLString;
 - (NSString *)XMLStringMinified;
 
@@ -87,6 +94,7 @@ FOUNDATION_EXPORT NSString *const CNXMLEmptyString;
 - (void)removeChildWithName:(NSString *)theChildName;
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes;
 - (void)removeAllChildren;
+- (CNXMLElement *)childWithName:(NSString *)theChildName;
 - (void)enumerateChildrenUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block;
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void (^)(CNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL *stop))block;
 - (CNXMLElement *)childWithName:(NSString *)theChildName;

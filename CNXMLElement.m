@@ -37,8 +37,11 @@ static NSString *const CNXMLStartTagBeginFormatString = @"<%@%@%@";
 static NSString *const CNXMLStartTagEndFormatString = @">";
 static NSString *const CNXMLStartTagEndSelfClosingFormatString = @"/>";
 static NSString *const CNXMLEndTagFormatString = @"</%@>";
+static NSString *const CNXMLMappingPrefixFormatString = @"%@:%@";
+static NSString *const CNXMLNamespacePrefixFormatString = @"xmlns:%@";
 static NSString *const CNXMLAttributePlaceholderFormatString = @" %@=\"%@\"";
 static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
 
 
 @interface CNXMLElement () {
@@ -70,6 +73,9 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 		_endTag = CNXMLEmptyString;
 		_children = [[NSMutableArray alloc] init];
         _level = 0;
+
+        _indentationType = CNXMLContentIndentationTypeTab;
+        _indentationWidth = 4;
 	}
 	return self;
 }
@@ -85,7 +91,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	if (self) {
 		_elementName = theName;
 		_mappingPrefix = (mappingPrefix ? : CNXMLEmptyString);
-		_qualifiedName = ([_mappingPrefix isEqualToString:CNXMLEmptyString] ? theName : [NSString stringWithFormat:@"%@:%@", _mappingPrefix, _elementName]);
+		_qualifiedName = ([_mappingPrefix isEqualToString:CNXMLEmptyString] ? theName : [NSString stringWithFormat:CNXMLMappingPrefixFormatString, _mappingPrefix, _elementName]);
 
 		if (attributes) {
 			_attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
@@ -99,7 +105,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 #pragma mark - Managing Namespaces
 
 - (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI {
-    NSString *key = [NSString stringWithFormat:@"xmlns:%@", thePrefix];
+    NSString *key = [NSString stringWithFormat:CNXMLNamespacePrefixFormatString, thePrefix];
     if (!_namespaces) {
         _namespaces = [NSMutableDictionary new];
     }
@@ -134,8 +140,17 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
     NSString *XMLEndTag = [self endTag];
 
     if (isFormatted) {
-        TAB = [TAB stringByPaddingToLength:self.level withString:@"\t" startingAtIndex:0];
         CRLF = @"\n";
+        switch (self.indentationType) {
+            case CNXMLContentIndentationTypeTab: {
+                TAB = [TAB stringByPaddingToLength:self.level withString:@"\t" startingAtIndex:0];
+                break;
+            }
+            case CNXMLContentIndentationTypeSpace: {
+                TAB = [TAB stringByPaddingToLength:(self.level * self.indentationWidth) withString:@" " startingAtIndex:0];
+                break;
+            }
+        }
     }
 
     if (self.isRoot) {
@@ -144,20 +159,21 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 
     if ([self hasChildren]) {
         NSString *valueString = CNXMLEmptyString;
+
         for (CNXMLElement *child in [self children]) {
+            child.indentationType = self.indentationType;
+            child.indentationWidth = self.indentationWidth;
+
 		    valueString = [valueString stringByAppendingString:(isFormatted ? [child XMLString] : [child XMLStringMinified])];
         }
 
-        [XMLString appendObjects:@[
-                       CRLF, TAB, XMLStartTag,
-                       TAB, valueString,
-                       CRLF, TAB, XMLEndTag
-                   ]];
+        [XMLString appendObjects:@[ CRLF, TAB, XMLStartTag, valueString, CRLF, TAB, XMLEndTag ]];
 	}
 	else {
         if ([self isSelfClosing]) {
             [XMLString appendObjects:@[ CRLF, TAB, XMLStartTag ]];
-        } else {
+        }
+        else {
             [XMLString appendObjects:@[ CRLF, TAB, XMLStartTag, self.value, XMLEndTag ]];
         }
 	}
@@ -264,6 +280,17 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	[_children removeAllObjects];
 }
 
+- (CNXMLElement *)childWithName:(NSString *)theChildName {
+    __block CNXMLElement *searchedChild = nil;
+    [self.children enumerateObjectsUsingBlock:^(CNXMLElement *aChild, NSUInteger idx, BOOL *stop) {
+        if ([aChild.elementName isEqualToString:theChildName]) {
+            searchedChild = aChild;
+            *stop = YES;
+        }
+    }];
+    return searchedChild;
+}
+
 - (void)enumerateChildrenUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block {
 	[_children enumerateObjectsUsingBlock: ^(CNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
 	    block(currentChild, idx, stop);
@@ -281,17 +308,6 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 	[enumElement enumerateChildrenUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
 	    block(child, idx, (lastChildIndex == idx), stop);
 	}];
-}
-
-- (CNXMLElement *)childWithName:(NSString *)theChildName {
-	__block CNXMLElement *requestedChild = nil;
-	[self enumerateChildrenUsingBlock: ^(CNXMLElement *child, NSUInteger idx, BOOL *stop) {
-	    if ([child.elementName isEqualToString:theChildName]) {
-	        requestedChild = child;
-	        *stop = YES;
-		}
-	}];
-	return requestedChild;
 }
 
 #pragma mark - Public Custom Accessors
