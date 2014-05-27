@@ -32,8 +32,13 @@
 
 FOUNDATION_EXPORT NSString *const CNXMLEmptyString;
 
+/**
+ Constant that describes the way of indentation if the XML document will be formatted.
+ */
 typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
-    CNXMLContentIndentationTypeTab = 0,     // default
+    /** Indention by the tab character */
+    CNXMLContentIndentationTypeTab = 0,
+    /** Indention by the space character (this is the default) */
     CNXMLContentIndentationTypeSpace
 };
 
@@ -43,14 +48,41 @@ typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
 /** @name  XML Element Creation */
 #pragma mark - XML Element Creation
 
+/**
+ Creates and returns an CNXMLElement object with the given name, namespace prefix and a set of attributes.
+
+ @param elementName   The element name.
+ @param mappingPrefix A namespace prefix
+ @param attributes    A dictionary of element attributes.
+
+ @return An instance of CNXMLElement.
+ */
 + (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
+
+/**
+ Creates and returns an CNXMLElement object with the given name, namespace prefix and a set of attributes.
+
+ @param elementName   The element name.
+ @param mappingPrefix A namespace prefix
+ @param attributes    A dictionary of element attributes.
+
+ @return An instance of CNXMLElement.
+ */
 - (instancetype)initWithName:(NSString *)theName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
+
 
 /** @name Managing Namespaces */
 #pragma mark - Managing Namespaces
 
 - (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI;
-//- (NSDictionary *)namespaces;
+
+/**
+ Returns the prefix for the given namespace URI.
+
+ @param theNamespaceURI A namespace URI string.
+
+ @return The prefix for the given namespace URI.
+ */
 - (NSString *)prefixForNamespaceURI:(NSString *)theNamespaceURI;
 
 
@@ -58,8 +90,12 @@ typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
 #pragma mark - XML Element Properties
 
 @property (strong, readonly) NSString *mappingPrefix;
+
+/** The name of this element. */
 @property (strong, readonly) NSString *elementName;
+/** A dictionary of the receivers attributes */
 @property (strong, readonly) NSDictionary *attributes;
+/** Property that determines if the receiver is the root element (of an XML tree). */
 @property (assign, getter = isRoot) BOOL root;
 @property (strong) NSString *value;
 @property (assign) NSUInteger level;
