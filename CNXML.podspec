@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = 'CNXML'
-  s.version               = '0.1.0'
+  s.version               = '0.1.1'
   s.summary               = 'Simple basic handling of XML files for both reading and manual creation.'
   s.homepage              = 'https://github.com/phranck/CNXML'
   s.author                = { 'Frank Gregor' => 'phranck@cocoanaut.com' }
