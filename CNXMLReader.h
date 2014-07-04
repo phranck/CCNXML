@@ -31,20 +31,24 @@
 
 #import "CNXMLElement.h"
 
+typedef void (^CNXMLReaderParseSuccessHandler)(void);
+typedef void (^CNXMLReaderParseFailureHandler)(NSError *parseError);
+
 
 @interface CNXMLReader : NSObject <NSXMLParserDelegate>
 
 /** @name Reading XML Documents */
 #pragma mark - Reading XML Documents
 
-+ (instancetype)documentWithContentsOfFile:(NSString *)xmlFilePath;
 - (instancetype)initWithContentsOfFile:(NSString *)xmlFilePath;
-
-+ (instancetype)documentWithContentsOfString:(NSString *)string;
 - (instancetype)initWithContentsOfString:(NSString *)string;
-
-+ (instancetype)documentWithFileURL:(NSURL *)theURL;
 - (instancetype)initWithFileURL:(NSURL *)theURL;
+
+
+/** @name Document Parsing */
+#pragma mark - Document Parsing
+
+- (void)parseUsingSuccessHandler:(CNXMLReaderParseSuccessHandler)successHandler failure:(CNXMLReaderParseFailureHandler)failureHandler;
 
 
 /** @name XML Document Properties */

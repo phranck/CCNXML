@@ -40,41 +40,45 @@
 /**
  XML parse error notification
 
-    * The notification object is nil
-    * The userInfo dictionary has two entries:
-        1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
-        2. CNXMLNotificationUserInfoDictErrorKey                        (NSError object with the parse error)
+ * The notification object is nil
+ * The userInfo dictionary has two entries:
+ 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CNXMLNotificationUserInfoDictErrorKey                        (NSError object with the parse error)
  */
 FOUNDATION_EXPORT NSString *const CNXMLParseErrorNotification;
 
 /**
  XML validation error notification
 
-    * The notification object is nil
-    * The userInfo dictionary has two entries:
-        1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
-        2. CNXMLNotificationUserInfoDictErrorKey                        (NSError object with the validation error)
+ * The notification object is nil
+ * The userInfo dictionary has two entries:
+ 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CNXMLNotificationUserInfoDictErrorKey                        (NSError object with the validation error)
  */
 FOUNDATION_EXPORT NSString *const CNXMLValidationErrorNotification;
 
 /**
  XML parser start element found notification
 
-    * The notification object is nil
-    * The userInfo dictionary has two entries:
-        1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
-        2. CNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
-        3. CNXMLNotificationUserInfoDictCurrentElementAttributesKey     (NSDictionary object with the element attributes)
+ * The notification object is nil
+ * The userInfo dictionary has two entries:
+ 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
+ 3. CNXMLNotificationUserInfoDictCurrentElementAttributesKey     (NSDictionary object with the element attributes)
+
+ NOTE: Be careful using this notification! It may slow down your parse performance.
  */
 FOUNDATION_EXPORT NSString *const CNXMLFoundStartElementNotification;
 
 /**
  XML parser start element found notification
 
-    * The notification object is nil
-    * The userInfo dictionary has two entries:
-        1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
-        2. CNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
+ * The notification object is nil
+ * The userInfo dictionary has two entries:
+ 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
+
+ NOTE: Be careful using this notification! It may slow down your parse performance.
  */
 FOUNDATION_EXPORT NSString *const CNXMLFoundEndElementNotification;
 
