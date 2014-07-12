@@ -34,9 +34,9 @@
 @implementation NSMutableString (CNXMLAdditions)
 
 - (void)appendObjects:(NSArray *)theObjects {
-    for (id theObject in theObjects) {
-        [self appendFormat:@"%@", theObject];
-    }
+   for (id theObject in theObjects) {
+      [self appendFormat:@"%@", theObject];
+   }
 }
 
 @end

@@ -42,6 +42,13 @@ typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
     CNXMLContentIndentationTypeSpace
 };
 
+@class CNXMLElement;
+
+typedef void (^CNXMLEnumerateChildrenBlock)(CNXMLElement *child, NSUInteger idx, BOOL *stop);
+typedef void (^CNXMLEnumerateChildWithNameBlock)(CNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL *stop);
+
+
+
 
 @interface CNXMLElement : NSObject
 
@@ -96,9 +103,9 @@ typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
 /** A dictionary of the receivers attributes */
 @property (strong, readonly) NSDictionary *attributes;
 /** Property that determines if the receiver is the root element (of an XML tree). */
-@property (assign, getter = isRoot) BOOL root;
+@property (assign, getter = isRoot) BOOL root;                       // default: NO
 @property (strong) NSString *value;
-@property (assign) NSUInteger level;
+@property (assign) NSUInteger level;                                 // default: 0
 
 
 /** @name Managing XML Element Attributes */
@@ -115,9 +122,9 @@ typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
 #pragma mark - Content Representation
 
 @property (assign) CNXMLContentIndentationType indentationType;
-@property (assign) NSUInteger indentationWidth;                     // default 4 (only effective if indentationType is set to CNXMLContentIndentationTypeSpace)
+@property (assign) NSUInteger indentationWidth;                      // default 4 (only effective if indentationType is set to CNXMLContentIndentationTypeSpace)
+@property (assign, nonatomic) BOOL useFormattedXML;                  // default: YES
 - (NSString *)XMLString;
-- (NSString *)XMLStringMinified;
 
 
 /** @name Managing Child Elements */
@@ -127,12 +134,12 @@ typedef NS_ENUM(NSUInteger, CNXMLContentIndentationType) {
 @property (assign, nonatomic, readonly) BOOL hasChildren;
 - (void)addChild:(CNXMLElement *)theChild;
 - (void)removeChild:(CNXMLElement *)theChild;
-- (void)removeChildWithName:(NSString *)theChildName;
-- (void)removeChildWithAttributes:(NSDictionary *)attibutes;
+- (void)removeChildWithName:(NSString *)theChildName __attribute__((deprecated));
+- (void)removeChildWithAttributes:(NSDictionary *)attibutes __attribute__((deprecated));
 - (void)removeAllChildren;
 - (CNXMLElement *)childWithName:(NSString *)theChildName;
-- (void)enumerateChildrenUsingBlock:(void (^)(CNXMLElement *child, NSUInteger idx, BOOL *stop))block;
-- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(void (^)(CNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL *stop))block;
+- (void)enumerateChildrenUsingBlock:(CNXMLEnumerateChildrenBlock)block;
+- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CNXMLEnumerateChildWithNameBlock)block;
 - (CNXMLElement *)childWithName:(NSString *)theChildName;
 
 @end

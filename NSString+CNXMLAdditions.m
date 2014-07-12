@@ -34,12 +34,27 @@
 @implementation NSString (CNXMLAdditions)
 
 - (NSString *)prefix {
-    NSString *mappingPrefix = @"";
-    NSArray *components = [self componentsSeparatedByString:@":"];
-    if ([components count] > 0) {
-        mappingPrefix = components[0];
-    }
-    return mappingPrefix;
+   NSString *mappingPrefix = @"";
+   NSArray *components = [self componentsSeparatedByString:@":"];
+   if ([components count] > 0) {
+      mappingPrefix = components[0];
+   }
+   return mappingPrefix;
+}
+
+- (NSString *)xmlEscapedString {
+   NSDictionary *entities = @{
+      @"&":    @"&amp;",
+//      @"\"":   @"&quot;",
+//      @"'":    @"&apos;",
+      @">":    @"&gt;",
+      @"<":    @"&lt;"
+   };
+   __block NSMutableString *xmlEscapedString = [NSMutableString stringWithString:self];
+   [entities enumerateKeysAndObjectsUsingBlock:^(NSString *entity, NSString *replacement, BOOL *stop) {
+      [xmlEscapedString replaceOccurrencesOfString:entity withString:replacement options:NSLiteralSearch range:NSMakeRange(0, [self length])];
+   }];
+   return xmlEscapedString;
 }
 
 @end

@@ -32,5 +32,6 @@
 @interface NSString (CNXMLAdditions)
 
 @property (strong, nonatomic, readonly) NSString *prefix;
+- (NSString *)xmlEscapedString;
 
 @end
