@@ -102,6 +102,8 @@ typedef void (^CNXMLEnumerateChildWithNameBlock)(CNXMLElement * child, NSUIntege
 @property (strong, readonly) NSString *elementName;
 /** A dictionary of the receivers attributes */
 @property (strong, readonly) NSDictionary *attributes;
+/** An array of ordered attribute names. If you want your attributes in a special order, use this array. */
+@property (strong) NSArray *attributesSortedKeys;
 /** Property that determines if the receiver is the root element (of an XML tree). */
 @property (assign, getter = isRoot) BOOL root;                       // default: NO
 @property (strong) NSString *value;
@@ -130,9 +132,11 @@ typedef void (^CNXMLEnumerateChildWithNameBlock)(CNXMLElement * child, NSUIntege
 /** @name Managing Child Elements */
 #pragma mark - Managing Child Elements
 
-@property (strong, readonly) NSArray *children;
+- (NSArray *)children;
+- (void)setChildren:(NSArray *)children;
 @property (assign, nonatomic, readonly) BOOL hasChildren;
 - (void)addChild:(CNXMLElement *)theChild;
+- (void)insertChild:(CNXMLElement *)child atIndex:(NSInteger)index;
 - (void)removeChild:(CNXMLElement *)theChild;
 - (void)removeChildWithName:(NSString *)theChildName __attribute__((deprecated));
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes __attribute__((deprecated));

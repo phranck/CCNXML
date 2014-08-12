@@ -63,8 +63,8 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 - (id)init {
    self = [super init];
    if (self) {
-      _attributes               = [NSMutableDictionary new];
-      _children                 = [NSMutableArray new];
+      _attributes               = [NSMutableDictionary dictionary];
+      _children                 = [NSMutableArray array];
       _namespaces               = nil;
 
       self.mappingPrefix        = CNXMLEmptyString;
@@ -76,6 +76,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
       self.root                 = NO;
       self.value                = CNXMLEmptyString;
       self.level                = 0;
+      self.attributesSortedKeys = nil;
 
       self.indentationType      = CNXMLContentIndentationTypeTab;
       self.indentationWidth     = 4;
@@ -108,7 +109,7 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 - (void)addNamespaceWithPrefix:(NSString *)thePrefix namespaceURI:(NSString *)theNamespaceURI {
    NSString *key = [NSString stringWithFormat:CNXMLNamespacePrefixFormatString, thePrefix];
    if (!_namespaces) {
-      _namespaces = [NSMutableDictionary new];
+      _namespaces = [NSMutableDictionary dictionary];
    }
    _namespaces[key] = theNamespaceURI;
 }
@@ -214,9 +215,18 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 
    // handling attributes
    if ([_attributes count] > 0) {
-      [_attributes enumerateKeysAndObjectsUsingBlock: ^(id attributeName, id attributeValue, BOOL *stop) {
-         attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, attributeName, attributeValue];
-      }];
+      if (self.attributesSortedKeys == nil) {
+         [_attributes enumerateKeysAndObjectsUsingBlock: ^(id attributeName, id attributeValue, BOOL *stop) {
+            attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, attributeName, attributeValue];
+         }];
+      }
+      else {
+         [self.attributesSortedKeys enumerateObjectsUsingBlock:^(NSString *attributeName, NSUInteger idx, BOOL *stop) {
+            if (_attributes[attributeName] != nil) {
+               attributesString = [attributesString stringByAppendingFormat:CNXMLAttributePlaceholderFormatString, attributeName, _attributes[attributeName]];
+            }
+         }];
+      }
    }
    return attributesString;
 }
@@ -238,6 +248,16 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
    if (theChild != nil) {
       theChild.level = self.level + 1;
       [_children addObject:theChild];
+   }
+}
+
+- (void)insertChild:(CNXMLElement *)child atIndex:(NSInteger)index {
+   if (child != nil) {
+      child.level = self.level + 1;
+      if (index > [_children count]) {
+         index = [_children count];
+      }
+      [_children insertObject:child atIndex:index];
    }
 }
 
@@ -310,6 +330,16 @@ static NSString *const CNXMLVersionAndEncodingHeaderString = @"<?xml version=\"1
 }
 
 #pragma mark - Public Custom Accessors
+
+- (NSArray *)children {
+   return _children;
+}
+
+- (void)setChildren:(NSArray *)children {
+   [self removeAllChildren];
+   _children = nil;
+   _children = [NSMutableArray arrayWithArray:children];
+}
 
 - (BOOL)hasChildren {
    return (self.children && [self.children count] > 0);

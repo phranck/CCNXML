@@ -67,9 +67,9 @@ NSString *const CNXMLNotificationUserInfoDictCurrentElementAttributesKey = @"CNX
 
       self.parseError         = nil;
       self.XMLparser          = nil;
-      self.elementStack       = [NSMutableArray new];
+      self.elementStack       = [NSMutableArray array];
       self.foundCharacters    = [NSMutableString new];
-      self.documentNamespaces = [NSMutableDictionary new];
+      self.documentNamespaces = [NSMutableDictionary dictionary];
       self.rootElement        = nil;
    }
    return self;
@@ -146,7 +146,7 @@ NSString *const CNXMLNotificationUserInfoDictCurrentElementAttributesKey = @"CNX
          [self.documentNamespaces enumerateKeysAndObjectsUsingBlock:^(NSString *prefix, NSString *namespaceURI, BOOL *stop) {
             [wSelf.rootElement addNamespaceWithPrefix:prefix namespaceURI:namespaceURI];
          }];
-         self.documentNamespaces = [NSMutableDictionary new];
+         self.documentNamespaces = [NSMutableDictionary dictionary];
       }
    }
    else {

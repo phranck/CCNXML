@@ -1,7 +1,6 @@
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=phranck&url=https://github.com/phranck/CNXML&title=CNXML&tags=github&category=software)
 
-
-##Overview
+#CNXML
 
 Simple basic handling of XML files for both reading and manual creation. You can specify your own mapping prefix, set attributes on each element, add and remove child items, iterate over children and so on.
 
