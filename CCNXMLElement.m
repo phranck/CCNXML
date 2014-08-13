@@ -95,7 +95,7 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
    if (self) {
       self.elementName = theName;
       self.mappingPrefix = (mappingPrefix ?: CCNXMLEmptyString);
-      self.qualifiedName = ([self.mappingPrefix isEqualToString:CNXMLEmptyString] ? theName : [NSString stringWithFormat:CCNXMLMappingPrefixFormatString, self.mappingPrefix, self.elementName]);
+      self.qualifiedName = ([self.mappingPrefix isEqualToString:CCNXMLEmptyString] ? theName : [NSString stringWithFormat:CCNXMLMappingPrefixFormatString, self.mappingPrefix, self.elementName]);
 
       if (attributes) {
          _attributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
@@ -132,7 +132,7 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
 }
 
 - (NSString *)_XMLStringFormatted:(BOOL)useFormattedXML {
-   NSMutableString *XMLString = [NSMutableString stringWithString:CNXMLEmptyString];
+   NSMutableString *XMLString = [NSMutableString stringWithString:CCNXMLEmptyString];
    NSString *CRLF             = CCNXMLEmptyString;
    NSString *TAB              = CCNXMLEmptyString;
    NSString *XMLStartTag      = self.startTag;
