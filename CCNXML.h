@@ -1,5 +1,5 @@
 //
-//  CNXML.h
+//  CCNXML.h
 //
 //  Created by Frank Gregor on 31.01.14.
 //  Copyright (c) 2014 cocoa:naut. All rights reserved.
@@ -31,64 +31,66 @@
 
 #import "CNXMLElement.h"
 #import "CNXMLReader.h"
-#import "NSMutableString+CNXMLAdditions.h"
-#import "NSString+CNXMLAdditions.h"
 
-#ifndef CNXML_h
-#define CNXML_h
+#import "NSString+CCNXMLAdditions.h"
+#import "NSMutableString+CCNXMLAdditions.h"
+
+
+#ifndef CCNXML_h
+#define CCNXML_h
 
 /**
  XML parse error notification
 
  * The notification object is nil
  * The userInfo dictionary has two entries:
- 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
- 2. CNXMLNotificationUserInfoDictErrorKey                        (NSError object with the parse error)
+ 1. CCNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CCNXMLNotificationUserInfoDictErrorKey                        (NSError object with the parse error)
  */
-FOUNDATION_EXPORT NSString *const CNXMLParseErrorNotification;
+FOUNDATION_EXPORT NSString *const CCNXMLParseErrorNotification;
 
 /**
  XML validation error notification
 
  * The notification object is nil
  * The userInfo dictionary has two entries:
- 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
- 2. CNXMLNotificationUserInfoDictErrorKey                        (NSError object with the validation error)
+ 1. CCNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CCNXMLNotificationUserInfoDictErrorKey                        (NSError object with the validation error)
  */
-FOUNDATION_EXPORT NSString *const CNXMLValidationErrorNotification;
+FOUNDATION_EXPORT NSString *const CCNXMLValidationErrorNotification;
 
 /**
  XML parser start element found notification
 
  * The notification object is nil
  * The userInfo dictionary has two entries:
- 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
- 2. CNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
- 3. CNXMLNotificationUserInfoDictCurrentElementAttributesKey     (NSDictionary object with the element attributes)
+ 1. CNXMLNotificationUserInfoDictParserKey                        (NSXMLParser object with the current parser)
+ 2. CCNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
+ 3. CCNXMLNotificationUserInfoDictCurrentElementAttributesKey     (NSDictionary object with the element attributes)
 
  NOTE: Be careful using this notification! It may slow down your parse performance.
  */
-FOUNDATION_EXPORT NSString *const CNXMLFoundStartElementNotification;
+FOUNDATION_EXPORT NSString *const CCNXMLFoundStartElementNotification;
 
 /**
  XML parser start element found notification
 
  * The notification object is nil
  * The userInfo dictionary has two entries:
- 1. CNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
- 2. CNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
+ 1. CCNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
+ 2. CCNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
 
  NOTE: Be careful using this notification! It may slow down your parse performance.
  */
-FOUNDATION_EXPORT NSString *const CNXMLFoundEndElementNotification;
+FOUNDATION_EXPORT NSString *const CCNXMLFoundEndElementNotification;
 
 
 
 // NSNotificationCenter userInfo dictionary keys
-FOUNDATION_EXPORT NSString *const CNXMLNotificationUserInfoDictParserKey;
-FOUNDATION_EXPORT NSString *const CNXMLNotificationUserInfoDictErrorKey;
-FOUNDATION_EXPORT NSString *const CNXMLNotificationUserInfoDictCurrentElementKey;
-FOUNDATION_EXPORT NSString *const CNXMLNotificationUserInfoDictCurrentElementAttributesKey;
+FOUNDATION_EXPORT NSString *const CCNXMLNotificationUserInfoDictParserKey;
+FOUNDATION_EXPORT NSString *const CCNXMLNotificationUserInfoDictErrorKey;
+FOUNDATION_EXPORT NSString *const CCNXMLNotificationUserInfoDictCurrentElementKey;
+FOUNDATION_EXPORT NSString *const CCNXMLNotificationUserInfoDictCurrentElementAttributesKey;
 
 
 
