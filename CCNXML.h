@@ -29,8 +29,8 @@
  */
 
 
-#import "CNXMLElement.h"
-#import "CNXMLReader.h"
+#import "CCNXMLElement.h"
+#import "CCNXMLReader.h"
 
 #import "NSString+CCNXMLAdditions.h"
 #import "NSMutableString+CCNXMLAdditions.h"

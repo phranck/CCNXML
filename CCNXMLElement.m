@@ -33,7 +33,7 @@
 #import "NSMutableString+CCNXMLAdditions.h"
 
 
-NSString *const CNXMLEmptyString = @"";
+NSString *const CCNXMLEmptyString = @"";
 static NSString *const CCNXMLStartTagBeginFormatString = @"<%@%@%@";
 static NSString *const CCNXMLStartTagEndFormatString = @">";
 static NSString *const CCNXMLStartTagEndSelfClosingFormatString = @"/>";
@@ -67,14 +67,14 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
       _children                 = [NSMutableArray array];
       _namespaces               = nil;
 
-      self.mappingPrefix        = CNXMLEmptyString;
-      self.qualifiedName        = CNXMLEmptyString;
-      self.startTag             = CNXMLEmptyString;
-      self.endTag               = CNXMLEmptyString;
+      self.mappingPrefix        = CCNXMLEmptyString;
+      self.qualifiedName        = CCNXMLEmptyString;
+      self.startTag             = CCNXMLEmptyString;
+      self.endTag               = CCNXMLEmptyString;
 
       self.useFormattedXML      = YES;
       self.root                 = NO;
-      self.value                = CNXMLEmptyString;
+      self.value                = CCNXMLEmptyString;
       self.level                = 0;
       self.attributesSortedKeys = nil;
 
@@ -94,7 +94,7 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
    self = [self init];
    if (self) {
       self.elementName = theName;
-      self.mappingPrefix = (mappingPrefix ?: CNXMLEmptyString);
+      self.mappingPrefix = (mappingPrefix ?: CCNXMLEmptyString);
       self.qualifiedName = ([self.mappingPrefix isEqualToString:CNXMLEmptyString] ? theName : [NSString stringWithFormat:CCNXMLMappingPrefixFormatString, self.mappingPrefix, self.elementName]);
 
       if (attributes) {
@@ -133,8 +133,8 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
 
 - (NSString *)_XMLStringFormatted:(BOOL)useFormattedXML {
    NSMutableString *XMLString = [NSMutableString stringWithString:CNXMLEmptyString];
-   NSString *CRLF             = CNXMLEmptyString;
-   NSString *TAB              = CNXMLEmptyString;
+   NSString *CRLF             = CCNXMLEmptyString;
+   NSString *TAB              = CCNXMLEmptyString;
    NSString *XMLStartTag      = self.startTag;
    NSString *XMLEndTag        = self.endTag;
 
@@ -157,7 +157,7 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
    }
 
    if ([self hasChildren]) {
-      NSString *valueString = CNXMLEmptyString;
+      NSString *valueString = CCNXMLEmptyString;
 
       for (CCNXMLElement *child in self.children) {
          child.indentationType      = self.indentationType;
@@ -204,7 +204,7 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
 }
 
 - (NSString *)attributesString {
-   __block NSString *attributesString = CNXMLEmptyString;
+   __block NSString *attributesString = CCNXMLEmptyString;
 
    // handling namespaces
    if (self.isRoot && _namespaces != nil) {
@@ -310,13 +310,13 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
    return searchedChild;
 }
 
-- (void)enumerateChildrenUsingBlock:(CNXMLEnumerateChildrenBlock)block {
+- (void)enumerateChildrenUsingBlock:(CCNXMLEnumerateChildrenBlock)block {
    [self.children enumerateObjectsUsingBlock: ^(CCNXMLElement *currentChild, NSUInteger idx, BOOL *stop) {
       block(currentChild, idx, stop);
    }];
 }
 
-- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CNXMLEnumerateChildWithNameBlock)block {
+- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CCNXMLEnumerateChildWithNameBlock)block {
    CCNXMLElement *enumElement = [self childWithName:elementName];
    NSInteger lastChildIndex = 0;
 
@@ -362,7 +362,7 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
 #pragma mark - Private Helper
 
 - (BOOL)isSelfClosing {
-   return (![self hasChildren] && ([[self whitespaceAndNewlineTrimmedValue] isEqualToString:CNXMLEmptyString] || self.value == nil));
+   return (![self hasChildren] && ([[self whitespaceAndNewlineTrimmedValue] isEqualToString:CCNXMLEmptyString] || self.value == nil));
 }
 
 - (NSString *)whitespaceAndNewlineTrimmedValue {

@@ -44,8 +44,8 @@ typedef NS_ENUM(NSUInteger, CCNXMLContentIndentationType) {
 
 @class CCNXMLElement;
 
-typedef void (^CNXMLEnumerateChildrenBlock)(CCNXMLElement *child, NSUInteger idx, BOOL *stop);
-typedef void (^CNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL *stop);
+typedef void (^CCNXMLEnumerateChildrenBlock)(CCNXMLElement *child, NSUInteger idx, BOOL *stop);
+typedef void (^CCNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInteger idx, BOOL isLastChild, BOOL *stop);
 
 
 
@@ -56,24 +56,24 @@ typedef void (^CNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInteg
 #pragma mark - XML Element Creation
 
 /**
- Creates and returns an CNXMLElement object with the given name, namespace prefix and a set of attributes.
+ Creates and returns an CCNXMLElement object with the given name, namespace prefix and a set of attributes.
 
  @param elementName   The element name.
  @param mappingPrefix A namespace prefix
  @param attributes    A dictionary of element attributes.
 
- @return An instance of CNXMLElement.
+ @return An instance of CCNXMLElement.
  */
 + (instancetype)elementWithName:(NSString *)elementName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
 
 /**
- Creates and returns an CNXMLElement object with the given name, namespace prefix and a set of attributes.
+ Creates and returns an CCNXMLElement object with the given name, namespace prefix and a set of attributes.
 
  @param elementName   The element name.
  @param mappingPrefix A namespace prefix
  @param attributes    A dictionary of element attributes.
 
- @return An instance of CNXMLElement.
+ @return An instance of CCNXMLElement.
  */
 - (instancetype)initWithName:(NSString *)theName mappingPrefix:(NSString *)mappingPrefix attributes:(NSDictionary *)attributes;
 
@@ -142,8 +142,8 @@ typedef void (^CNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInteg
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes __attribute__((deprecated));
 - (void)removeAllChildren;
 - (CCNXMLElement *)childWithName:(NSString *)theChildName;
-- (void)enumerateChildrenUsingBlock:(CNXMLEnumerateChildrenBlock)block;
-- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CNXMLEnumerateChildWithNameBlock)block;
+- (void)enumerateChildrenUsingBlock:(CCNXMLEnumerateChildrenBlock)block;
+- (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CCNXMLEnumerateChildWithNameBlock)block;
 - (CCNXMLElement *)childWithName:(NSString *)theChildName;
 
 @end
