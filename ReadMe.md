@@ -4,6 +4,8 @@
 
 Simple basic handling of XML files for both reading and manual creation. You can specify your own mapping prefix, set attributes on each element, add and remove child items, iterate over children and so on.
 
+__UPDATE (August 13th, 2014): THIS REPOSITORY HAS BEEN RENAMED (and all its sources refactored) FROM `CNXML` TO `CCNXML`!__
+
 
 ##Installation
 ####Via CocoaPods
