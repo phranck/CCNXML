@@ -184,21 +184,21 @@ static NSString *const CCNXMLVersionAndEncodingHeaderString = @"<?xml version=\"
 #pragma mark - Managing XML Element Attributes
 
 - (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute {
-   if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString]) {
+   if (theAttribute != nil && ![theAttribute isEqualToString:CCNXMLEmptyString]) {
       _attributes[theAttribute] = theValue;
    }
 }
 
 - (id)valueForAttribute:(NSString *)theAttribute {
    id attributeValue = nil;
-   if (_attributes && [_attributes count] > 0 && ![theAttribute isEqualToString:CNXMLEmptyString]) {
+   if (_attributes && [_attributes count] > 0 && ![theAttribute isEqualToString:CCNXMLEmptyString]) {
       attributeValue = _attributes[theAttribute];
    }
    return attributeValue;
 }
 
 - (void)removeAttribute:(NSString *)theAttribute {
-   if (theAttribute != nil && ![theAttribute isEqualToString:CNXMLEmptyString] && _attributes[theAttribute]) {
+   if (theAttribute != nil && ![theAttribute isEqualToString:CCNXMLEmptyString] && _attributes[theAttribute]) {
       [_attributes removeObjectForKey:theAttribute];
    }
 }
