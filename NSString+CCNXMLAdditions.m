@@ -51,7 +51,10 @@
    };
    __block NSMutableString *xmlEscapedString = [NSMutableString stringWithString:self];
    [entities enumerateKeysAndObjectsUsingBlock:^(NSString *entity, NSString *replacement, BOOL *stop) {
-      [xmlEscapedString replaceOccurrencesOfString:entity withString:replacement options:NSLiteralSearch range:NSMakeRange(0, [self length])];
+      [xmlEscapedString replaceOccurrencesOfString:entity
+                                        withString:replacement
+                                           options:(NSLiteralSearch|NSCaseInsensitiveSearch|NSWidthInsensitiveSearch)
+                                             range:NSMakeRange(0, [self length])];
    }];
    return xmlEscapedString;
 }

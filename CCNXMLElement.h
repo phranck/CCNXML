@@ -113,11 +113,11 @@ typedef void (^CCNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInte
 /** @name Managing XML Element Attributes */
 #pragma mark - Managing XML Element Attributes
 
-- (void)setValue:(id)theValue forAttribute:(NSString *)theAttribute;
-- (id)valueForAttribute:(NSString *)theAttribute;
-- (void)removeAttribute:(NSString *)theAttribute;
+- (void)setValue:(id)theValue forAttribute:(NSString *)attribute;
+- (id)valueForAttribute:(NSString *)attribute;
+- (void)removeAttribute:(NSString *)attribute;
 - (NSString *)attributesString;
-- (BOOL)hasAttribute:(NSString *)theAttribute;
+- (BOOL)hasAttribute:(NSString *)attribute;
 
 
 /** @name Content Representation */
@@ -135,15 +135,15 @@ typedef void (^CCNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInte
 - (NSArray *)children;
 - (void)setChildren:(NSArray *)children;
 @property (assign, nonatomic, readonly) BOOL hasChildren;
-- (void)addChild:(CCNXMLElement *)theChild;
+- (void)addChild:(CCNXMLElement *)child;
 - (void)insertChild:(CCNXMLElement *)child atIndex:(NSInteger)index;
-- (void)removeChild:(CCNXMLElement *)theChild;
+- (void)removeChild:(CCNXMLElement *)child;
 - (void)removeChildWithName:(NSString *)theChildName __attribute__((deprecated));
 - (void)removeChildWithAttributes:(NSDictionary *)attibutes __attribute__((deprecated));
 - (void)removeAllChildren;
-- (CCNXMLElement *)childWithName:(NSString *)theChildName;
+- (CCNXMLElement *)childWithName:(NSString *)childName;
 - (void)enumerateChildrenUsingBlock:(CCNXMLEnumerateChildrenBlock)block;
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CCNXMLEnumerateChildWithNameBlock)block;
-- (CCNXMLElement *)childWithName:(NSString *)theChildName;
+- (CCNXMLElement *)childWithName:(NSString *)childName;
 
 @end

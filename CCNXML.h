@@ -64,7 +64,7 @@ FOUNDATION_EXPORT NSString *const CCNXMLValidationErrorNotification;
 
  * The notification object is nil
  * The userInfo dictionary has two entries:
- 1. CNXMLNotificationUserInfoDictParserKey                        (NSXMLParser object with the current parser)
+ 1. CCNXMLNotificationUserInfoDictParserKey                       (NSXMLParser object with the current parser)
  2. CCNXMLNotificationUserInfoDictCurrentElementKey               (NSString object with the current element)
  3. CCNXMLNotificationUserInfoDictCurrentElementAttributesKey     (NSDictionary object with the element attributes)
 
