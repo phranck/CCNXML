@@ -144,6 +144,5 @@ typedef void (^CCNXMLEnumerateChildWithNameBlock)(CCNXMLElement * child, NSUInte
 - (CCNXMLElement *)childWithName:(NSString *)childName;
 - (void)enumerateChildrenUsingBlock:(CCNXMLEnumerateChildrenBlock)block;
 - (void)enumerateChildWithName:(NSString *)elementName usingBlock:(CCNXMLEnumerateChildWithNameBlock)block;
-- (CCNXMLElement *)childWithName:(NSString *)childName;
 
 @end
